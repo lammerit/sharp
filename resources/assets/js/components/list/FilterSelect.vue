@@ -6,7 +6,7 @@
               'SharpFilterSelect--multiple':multiple,
               'SharpFilterSelect--searchable':searchable
           }"
-          tabindex="0" @click="open"
+          tabindex="0"
     >
         <!-- dropdown & search input -->
         <sharp-autocomplete
@@ -21,14 +21,15 @@
             :allow-empty="!required"
             :preserve-search="false"
             :show-pointer="false"
+            :searchable="searchable"
             no-result-item
             mode="local"
             ref="autocomplete"
             @multiselect-input="handleAutocompleteInput"
             @close="close"
         />
-        <span class="SharpFilterSelect__text">
-            {{name}}<span v-if="!empty" style="font-weight:normal">&nbsp;&nbsp;</span>
+        <span class="SharpFilterSelect__text" @mousedown="handleMouseDown">
+            {{name}}
         </span>
 
         <!-- value text & tags -->
@@ -40,9 +41,10 @@
             :clearable="!required"
             :inline="false"
             :unique-identifier="filterKey"
-            :placeholder="fixZeroValuePlaceholder || ' '"
+            placeholder=" "
             ref="select"
             @input="handleSelect"
+            @mousedown.native="handleMouseDown"
         />
     </span>
 </template>
@@ -57,17 +59,13 @@
 
     export default {
         name: 'SharpFilterSelect',
-        mixins:[Localization],
+        mixins: [Localization],
         components: {
             SharpDropdown,
             SharpSelect,
             SharpAutocomplete
         },
         props: {
-            filterKey: {
-                type: String,
-                required: true
-            },
             name : {
                 type: String,
                 required: true
@@ -83,7 +81,9 @@
             required: Boolean,
             searchable: Boolean,
             searchKeys: Array,
-            template: String
+            template: String,
+
+            filterKey: String,
         },
         data() {
             return {
@@ -99,9 +99,6 @@
             empty() {
                 return this.value == null || this.multiple && !this.value.length;
             },
-            fixZeroValuePlaceholder() {
-                return !this.multiple ? (this.values.find(option => option.id===0)||{}).label : '';
-            },
             autocompleteValue() {
                 return this.multiple ? (this.value||[]).map(value=>this.optionById[value]) : this.optionById[this.value];
             }
@@ -113,17 +110,31 @@
             handleAutocompleteInput(value) {
                 this.$emit('input', this.multiple ? value.map(v=>v.id) : (value||{}).id);
             },
+            handleMouseDown() {
+                if(this.opened) {
+                    this.close();
+                } else {
+                    this.open();
+                }
+            },
             open() {
                 this.opened = true;
-                this.showMultiselect();
+                this.$emit('open');
+                this.$nextTick(this.showDropdown);
             },
             close() {
                 this.opened = false;
+                this.$emit('close');
+                this.$nextTick(this.blur);
             },
-            showMultiselect() {
+            showDropdown() {
                 let { autocomplete:{ $refs: { multiselect } } } = this.$refs;
                 multiselect.activate();
-            }
+            },
+            blur() {
+                let { select:{ $refs: { multiselect } } } = this.$refs;
+                multiselect.deactivate();
+            },
         }
     }
 </script>

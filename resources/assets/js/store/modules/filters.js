@@ -9,10 +9,10 @@ const filterQueryRE = new RegExp(`^${filterQueryPrefix}`);
 export default {
     namespaced: true,
 
-    state: {
+    state: ()=>({
         filters: null,
-        values: {}
-    },
+        values: {},
+    }),
 
     mutations: {
         [SET_FILTERS](state, filters) {
@@ -20,7 +20,7 @@ export default {
         },
         [SET_FILTER_VALUE](state, { key, value }) {
             Vue.set(state.values, key, value);
-        }
+        },
     },
 
     getters: {
@@ -29,6 +29,9 @@ export default {
         },
         filters(state) {
             return state.filters || []
+        },
+        values(state) {
+            return state.values;
         },
 
         defaultValue() {
@@ -63,7 +66,21 @@ export default {
                 }
                 return value;
             }
-        }
+        },
+        nextValues(state) {
+            return ({ filter, value }) => {
+                let base = state.values;
+                if(filter.master) {
+                    base = Object.keys(state.values).reduce((res, key) => ({ ...res, [key]:null }), {});
+                }
+                return { ...base, [filter.key]: value };
+            };
+        },
+        nextQuery(state, getters) {
+            return ({ filter, value }) => {
+                return getters.getQueryParams(getters.nextValues({ filter, value }));
+            }
+        },
     },
 
     actions: {
@@ -84,6 +101,6 @@ export default {
                 key: filter.key,
                 value: getters.resolveFilterValue({ filter, value })
             });
-        }
+        },
     }
 }

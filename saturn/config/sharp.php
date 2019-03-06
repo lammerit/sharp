@@ -5,6 +5,7 @@ return [
     "name" => "Saturn",
 
     "custom_url_segment" => "admin",
+    "display_sharp_version_in_title" => true,
 
     "extensions" => [
         "assets" => [
@@ -79,6 +80,10 @@ return [
         "travels_dashboard" => [
             "view" => \App\Sharp\TravelsDashboard::class,
         ],
+    ],
+
+    "global_filters" => [
+        "corporation" => \App\Sharp\Filters\CorporationGlobalFilter::class
     ],
 
     "menu" => [

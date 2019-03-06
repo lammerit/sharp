@@ -44,6 +44,12 @@ describe('markdown-field', () => {
         });
     }
 
+    beforeAll(()=>{
+        // prevent jsdom errors
+        window.focus = jest.fn();
+        window.scrollTo = jest.fn();
+    });
+
     beforeEach(()=>{
         // mock range functions
         document.body.createTextRange = () => ({
@@ -244,6 +250,11 @@ describe('markdown-field', () => {
         test('has localized editor mixin with appropriate text prop', ()=>{
             let wrapper = mount(Markdown, MockInjections);
             expect(wrapper.vm.$options._localizedEditor).toEqual({ textProp:'text' });
+        });
+
+        test('mount with null localized value', ()=>{
+            let wrapper = createLocalizedWrapper({ value: { text: null }, locales:['fr', 'en'], locale:'fr' });
+            expect(wrapper.find(Markdown).isVueInstance()).toBe(true);
         });
     });
 

@@ -1,10 +1,9 @@
-import Vue from 'vue';
 import filters from '../../store/modules/filters';
 import { SET_FILTERS, SET_FILTER_VALUE } from "../../store/modules/filters";
 
 describe('store filters', () => {
     test('state match snapshot', ()=>{
-        expect(filters.state).toMatchSnapshot();
+        expect(filters.state()).toMatchSnapshot();
     });
 
     describe('mutations', () => {
@@ -94,6 +93,36 @@ describe('store filters', () => {
             expect(resolveFilterValue({
                 filter: { multiple: true }, value: [3]
             })).toEqual([3]);
+        });
+
+        test('nextValues', ()=>{
+            const state = {
+                values: {
+                    type: 'aa'
+                }
+            };
+
+            expect(filters.getters.nextValues(state)({ filter: { key:'filter' }, value: 1 }))
+                .toEqual({
+                    type: 'aa',
+                    filter: 1
+                });
+            expect(filters.getters.nextValues(state)({ filter: { key:'filter', master: true }, value: 1 }))
+                .toEqual({
+                    type: null,
+                    filter: 1
+                });
+        });
+
+        test('nextQuery', ()=>{
+            const getters = {
+                getQueryParams: jest.fn(()=>'query params'),
+                nextValues: jest.fn(()=>'next values')
+            };
+
+            expect(filters.getters.nextQuery(null, getters)({ filter:{ key:'filter' }, value:1 })).toEqual('query params');
+            expect(getters.getQueryParams).toHaveBeenCalledWith('next values');
+            expect(getters.nextValues).toHaveBeenCalledWith({ filter:{ key:'filter' }, value:1 });
         });
     });
 

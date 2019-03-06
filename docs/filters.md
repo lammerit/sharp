@@ -1,7 +1,14 @@
-# Entity List Filters
+# Filters
 
-Entity List Filters are a simple way for the user to filter list items on some attribute, like for instance display only books that cost more than 15 euros.
+Filters are a simple way for the user to filter list items or dashboard (see below) widgets on some attribute, like for instance display only books that cost more than 15 euros.
 
+This documentation is written for the EntityList case, but the API is the same for Dashboard (as explained at the end of this page).
+
+## Generator
+
+```sh
+php artisan sharp:make:list-filter <class_name> [--required,--multiple]
+```
 
 ## Write the filter class
 
@@ -85,7 +92,7 @@ In this case, with Eloquent for instance, your might have to modify your code to
 ```php
     if ($params->filterFor("pilots")) {
         $spaceships->whereIn(
-            "pilots.id", 
+            "pilots.id",
             (array)$params->filterFor("pilots")
         );
     }
@@ -98,7 +105,7 @@ Note that a filter can't be required AND multiple.
 To use a custom label for the filter, simply add a `label()` function that returns a string in the Filter class.
 
 ```php
-    public function label() 
+    public function label()
     {
         return "My label";
     }
@@ -178,6 +185,91 @@ In some cases (like linked filters, for instance: the second filter values depen
         return true;
     }
 ```
+
+## Retained filters value in session
+
+Sometimes you'll want to make the filter's value persistent across calls. Say for example that you have a "country" filter, which is common to several Entity Lists: the idea is to keep the user choice even when he changes the current displayed list.
+
+To do that, add a `retainValueInSession()` function to your filter:
+
+```php
+ class CountryFilter implements EntityListFilter
+ {
+     public function values()
+     {
+         [...]
+     }
+
+     public function retainValueInSession()
+     {
+         return true;
+     }
+ }
+ ```
+
+And that's it, Sharp will keep the filter value in session and ensure it is valued on next requests (if not overridden). This feature works for all types of filters (required, multiple).
+
+**Warning**: in order to make this feature work, since filters are generalized, you'll need to have unique filters name.
+
+## Filters for Dashboards
+
+[Dashboards](dashboard.md) can too take advantage of filters; the API is almost the same, here's the specifics:
+
+- There is obviously no Entity or Instance distinction: the only available option are `Code16\Sharp\Dashboard\DashboardFilter`, `Code16\Sharp\Dashboard\DashboardMultipleFilter` and `Code16\Sharp\Dashboard\DashboardRequiredFilter`.
+- Filters must be declared in the `buildDashboardConfig()` method of the Dashboard.
+- And finally, Sharp will not call `getListData(EntityListQueryParams $params)` but `buildWidgetsData(DashboardQueryParams $params)`. The API is the same, meaning we can call `$params->filterFor('...')`.
+
+## Global menu Filters
+
+Sometimes you may want to "scope" the entire data set. An example could be a user which can manage several organizations.
+
+Instead of adding a filter on almost every Entity List, in this case, you can define a global filter, which will appear like this (on the left menu):
+
+![Example](img/global-filter.png)
+
+To achieve this, first write the filter class, like any filter, except it must implement `\Code16\Sharp\Utils\Filters\GlobalRequiredFilter` — meaning it must be a required filter.
+
+```php
+class OrganizationGlobalFilter implements GlobalRequiredFilter
+{
+
+    public function values()
+    {
+        return Organization::orderBy("name")
+            ->pluck("name", "id")
+            ->all();
+    }
+
+    public function defaultValue()
+    {
+        return Organization::first()->id;
+    }
+}
+```
+
+And then, we declare it in Sharp's config file:
+
+```php
+// sharp.php
+
+return [
+    [...]
+
+    "global_filters" => [
+        "organization" => OrganizationGlobalFilter::class
+    ],
+
+    [...]
+];
+```
+
+Finally, to get the actual value of the filter on your Entity List or Form classes, you must use `SharpContext`:
+
+```php
+app(SharpContext::class)->globalFilterFor('organization')
+```
+
+The usage of SharpContext is [detailed here](context.md).
 
 ---
 

@@ -9,12 +9,11 @@ use Code16\Sharp\Form\Fields\SharpFormMarkdownField;
 use Code16\Sharp\Tests\SharpTestCase;
 use Illuminate\Http\Testing\FileFactory;
 use Illuminate\Support\Facades\File;
-use Mockery;
 
 class MarkdownFormatterTest extends SharpTestCase
 {
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -86,7 +85,7 @@ class MarkdownFormatterTest extends SharpTestCase
 
         $this->assertEquals("local:$image", $toFrontArray["name"]);
         $this->assertTrue($toFrontArray["size"] > 0);
-        $this->assertStringStartsWith(url("thumbnails/data/1000-400/" . basename($image)), $toFrontArray["thumbnail"]);
+        $this->assertStringStartsWith("/storage/thumbnails/data/1000-400/" . basename($image), $toFrontArray["thumbnail"]);
     }
 
     /** @test */

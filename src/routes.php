@@ -11,6 +11,14 @@ Route::group([
         ->name("code16.sharp.api.dashboard")
         ->uses('DashboardController@show');
 
+    Route::get("/dashboard/{dashboardKey}/command/{commandKey}/data")
+        ->name("code16.sharp.api.dashboard.command.data")
+        ->uses('Commands\DashboardCommandController@show');
+
+    Route::post("/dashboard/{dashboardKey}/command/{commandKey}")
+        ->name("code16.sharp.api.dashboard.command")
+        ->uses('Commands\DashboardCommandController@update');
+
     Route::get("/list/{entityKey}")
         ->name("code16.sharp.api.list")
         ->middleware(['sharp_api_append_list_authorizations', 'sharp_api_append_list_multiform', 'sharp_save_list_params', 'sharp_api_append_notifications'])
@@ -66,6 +74,13 @@ Route::group([
         ->name("code16.sharp.api.form.download")
         ->uses('FormDownloadController@show');
 
+    Route::get("/filters")
+        ->name("code16.sharp.api.filter.index")
+        ->uses('GlobalFilterController@index');
+
+    Route::post("/filters/{filterKey}")
+        ->name("code16.sharp.api.filter.update")
+        ->uses('GlobalFilterController@update');
 });
 
 // Web routes

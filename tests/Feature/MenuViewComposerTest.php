@@ -6,9 +6,10 @@ use Code16\Sharp\Tests\Feature\Api\BaseApiTest;
 
 class MenuViewComposerTest extends BaseApiTest
 {
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
+
         $this->login();
     }
 
@@ -30,7 +31,7 @@ class MenuViewComposerTest extends BaseApiTest
 
         $menu = $this->get('/sharp/')->getOriginalContent()["sharpMenu"];
 
-        $this->assertArraySubset([
+        $this->assertArrayContainsSubset([
             "label" => "external",
             "icon" => "fa-globe",
             "url" => "https://google.com",
@@ -55,7 +56,7 @@ class MenuViewComposerTest extends BaseApiTest
 
         $menu = $this->followingRedirects()->get('/sharp/')->getOriginalContent()["sharpMenu"];
 
-        $this->assertArraySubset([
+        $this->assertArrayContainsSubset([
             "key" => "person",
             "label" => "people",
             "icon" => "fa-user",
@@ -88,7 +89,7 @@ class MenuViewComposerTest extends BaseApiTest
         $this->assertEquals("Data", $menu->menuItems[0]->label);
         $this->assertEquals("category", $menu->menuItems[0]->type);
 
-        $this->assertArraySubset([
+        $this->assertArrayContainsSubset([
             "key" => "person",
             "label" => "people",
             "icon" => "fa-user",
@@ -113,7 +114,7 @@ class MenuViewComposerTest extends BaseApiTest
 
         $menu = $this->followingRedirects()->get('/sharp/')->getOriginalContent()["sharpMenu"];
 
-        $this->assertArraySubset([
+        $this->assertArrayContainsSubset([
             "key" => "personal_dashboard",
             "label" => "My Dashboard",
             "icon" => "fa-dashboard",
