@@ -5,7 +5,7 @@ We need an Entity List to display the list of `instances` for an `entity`. This 
 ## Generator
 
 ```sh
-php artisan sharp:make:list <class_name> [--model=<model_name>]
+php artisan sharp:make:entity-list <class_name> [--model=<model_name>]
 ```
 
 ## Write the class
